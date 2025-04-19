@@ -59,6 +59,7 @@ cmake_install*
 # IDE Files
 .vscode
 .idea/
+.github/
 
 # Temporary Files
 *.swp
