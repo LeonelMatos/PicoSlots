@@ -5,7 +5,8 @@ set(PROJECT_NAME picoslots)
 
 # Set your project sources here
 set(PROJECT_SOURCES
-    main.cpp
+    picoslots.cpp
+    picoslots.hpp
 )
 
 # --- Here Be Boilerplate ---
@@ -39,7 +40,7 @@ picosystem_executable(
 
 # Set your build options here
 pixel_double(${PROJECT_NAME})          # 120x120 resolution game, pixel-doubled to 240x240
-disable_startup_logo(${PROJECT_NAME})  # Skip the PicoSystem splash
+#disable_startup_logo(${PROJECT_NAME})  # Skip the PicoSystem splash
 #no_font(${PROJECT_NAME})              # Omit the default font
 #no_spritesheet(${PROJECT_NAME})       # Omit the default spritesheet
 #no_overclock(${PROJECT_NAME})         # Don't overclock
