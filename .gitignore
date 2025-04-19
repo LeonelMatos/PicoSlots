@@ -1,0 +1,68 @@
+# Build directories
+/generated/
+/_deps/
+build*/
+
+# CMake Generated Files
+CMakeCache.txt
+CMakeFiles/
+CMakeDoxygen*
+cmake_install*
+
+# Prerequisites
+*.d
+
+# Compiled Object files / Binaries
+*.slo
+*.lo
+*.o
+*.obj
+#----
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# Pico SDK
+/pico_sdk/
+/picotool/
+/pioasm/
+/pioasm-install/
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+**/build
+
+# IDE Files
+.vscode
+.idea/
+
+# Temporary Files
+*.swp
+*~
+*.bak
+
+.DS_Store
