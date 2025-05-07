@@ -7,6 +7,7 @@ set(PROJECT_NAME picoslots)
 set(PROJECT_SOURCES
     picoslots.cpp
     picoslots.hpp
+    sound.hpp
 )
 
 # --- Here Be Boilerplate ---

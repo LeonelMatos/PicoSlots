@@ -1,16 +1,14 @@
 #include "picosystem.hpp"
-#include "picoslots.hpp"
-
 using namespace picosystem;
 
-bool DEBUG_MODE = false;
+#include "picoslots.hpp"
+
 
 //Game State
 struct SlotMachine {
     int reels[3] = {1, 1, 1};
     int target_reels[3];
     uint32_t win_display_start = 0;
-    bool has_win = false;
     bool is_spinning = false;
     int reels_stopped = 0;
     uint32_t spin_start = 0;
@@ -22,17 +20,13 @@ struct SlotMachine {
     
 } game;
 
-const voice_t Audio::STARTUP_VOICE = voice(50, 100, 70, 200, 5, 50, 20);
-const voice_t Audio::SPIN_VOICE = voice(10, 50, 0, 100, -20, 100, 0, 10, 5);
-const voice_t Audio::WIN_VOICE = voice(10, 100, 80, 300, 10, 100, 50, 5, 10);
-const voice_t Audio::REEL_STOP_VOICE = voice(5, 30, 50, 100, 0, 0, 10);
+enum class WinState {
+    NONE,
+    DOUBLE,
+    JACKPOT
+};
 
-void startup_jingle() {
-    play(Audio::STARTUP_VOICE, Notes::A4, 200, 100);
-    play(Audio::STARTUP_VOICE, Notes::C5, 200, 100);
-    play(Audio::STARTUP_VOICE, Notes::C6, 200, 100);
-    play(Audio::STARTUP_VOICE, Notes::E5, 200, 100);
-}
+WinState win_state = WinState::NONE;
 
 void draw_debug_grid() {
     pen(30,30,30);
@@ -42,7 +36,7 @@ void draw_debug_grid() {
 
 void init() {
     srand(time_us());
-    startup_jingle();
+    play_sound("startup_jingle");
 }
 
 void start_spin() {
@@ -105,22 +99,21 @@ void update(uint32_t tick) {
         if (spin_time >= reel1_stop && game.reels_stopped == 0) {
             game.reels[0] = game.target_reels[0];
             game.reels_stopped = 1;
-            play(Audio::REEL_STOP_VOICE, Notes::C5, 300, 100);
+            play_sound("reel1_stop");
         }
         if (spin_time >= reel2_stop && game.reels_stopped == 1) {
             game.reels[1] = game.target_reels[1];
             game.reels_stopped = 2;
-            play(Audio::REEL_STOP_VOICE, Notes::E5, 300, 100);
+            play_sound("reel2_stop");
         }
         if (spin_time >= reel3_stop && game.reels_stopped == 2) {
             game.reels[2] = game.target_reels[2];
             game.reels_stopped = 3;
-            play(Audio::REEL_STOP_VOICE, Notes::A5, 300, 100);
+            play_sound("reel3_stop");
         }
 
         if (game.reels_stopped == 3) {
             game.is_spinning = false;
-            game.has_win = false;
             
             // Exact win condition checks
             bool jackpot = (game.reels[0] == game.reels[1]) && 
@@ -130,14 +123,17 @@ void update(uint32_t tick) {
                             (game.reels[0] == game.reels[2]);
 
             if (jackpot) {
-                game.has_win = true;
+                win_state = WinState::JACKPOT;
                 game.credits += Config::JACKPOT_PAY;
-                play(Audio::WIN_VOICE, Notes::C6, 500, 90);
+                play_sound("win_jackpot");
             } 
             else if (double_win) {
-                game.has_win = true;
+                win_state = WinState::DOUBLE;
                 game.credits += Config::MATCH2_PAY;
-                play(Audio::WIN_VOICE, Notes::E5, 300, 80);
+                play_sound("win_double");
+            }
+            else {
+                win_state = WinState::NONE;
             }
             
             game.win_display_start = time_us();
@@ -200,12 +196,14 @@ void draw(uint32_t tick) {
 
     //Winning texts
     pen(color.yellow);
-    if (game.has_win && (time_us() - game.win_display_start < 3000000)) {
-        if (game.reels[0] == game.reels[1] && game.reels[1] == game.reels[2]) {
-            text("JACKPOT!", 35, 85);
-        }
-        else {
-            text("WINNER!", 40, 85);
+    if((time_us()-game.win_display_start < 3000000)) {
+        switch(win_state) {
+            case WinState::JACKPOT:
+                text("JACKPOT!", 35,85);
+                break;
+            case WinState::DOUBLE:
+                text("WINNER!", 40, 85);
+                break;
         }
     }
 
